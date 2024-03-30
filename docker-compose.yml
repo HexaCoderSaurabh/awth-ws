@@ -1,0 +1,20 @@
+version: '3.1'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '4000:4000'
+    volumes:
+      - .:/usr/app
+    environment:
+      STAGE: dev
+
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    driver: bridge
