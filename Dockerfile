@@ -11,4 +11,4 @@ RUN pnpm i
 
 COPY . .
 
-CMD ["npm", "run", "start:dev"]
+CMD ["npm", "run", "start:dev", "--", "--inspect=0.0.0.0:4000"]
