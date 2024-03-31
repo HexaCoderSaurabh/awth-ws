@@ -2,21 +2,23 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ConfigValidationSchema } from './config.schema';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { DataSource } from 'typeorm';
+import { CustomNamingStrategy } from './helper/customNamingStrategy';
+import { EmailModule } from './email/email.module';
 @Module({
   imports: [
     UserModule,
     ConfigModule.forRoot({
       envFilePath: [`.env.stage.${process.env.STAGE}`],
       validationSchema: ConfigValidationSchema,
+      cache: true
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService) => {
+      useFactory: async (configService): Promise<TypeOrmModuleOptions> => {
         return {
           type: configService.get('DB_TYPE'),
           host: configService.get('DB_HOST'),
@@ -24,21 +26,21 @@ import { DataSource } from 'typeorm';
           username: configService.get('DB_USERNAME'),
           password: configService.get('DB_PASSWORD'),
           database: configService.get('DB_NAME'),
-          dialectOptions: {
-            decimalNumbers: true,
-          },
-          logging: true,
+          logging: false,
           entities: ['dist/**/*.entity{.ts,.js}'],
-          synchronize: true
+          synchronize: true,
+          namingStrategy: new CustomNamingStrategy(),
+          extra: {
+            dialectOptions: {
+              decimalNumbers: true,
+            },
+          }
         };
-      },
-      dataSourceFactory: async (options) => {
-        const dataSource = await new DataSource(options).initialize();
-        return dataSource;
-      },
+      }
     }),
+    EmailModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService]
 })
-export class AppModule {}
+export class AppModule { }
