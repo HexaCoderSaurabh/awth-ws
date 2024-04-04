@@ -35,7 +35,7 @@ export class UserService {
 
       await user.addPassword(pepper);
       await user.generateEVToken();
-      this.emailService.sendVerificationEmail(user.email, user.emailVerificationToken, user.username)
+      await this.emailService.sendVerificationEmail(user.email, user.emailVerificationToken, user.username)
 
       const response = await this.usersRepository.save(user);
       this.logger.verbose('Successfully created user')

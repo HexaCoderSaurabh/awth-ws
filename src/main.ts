@@ -4,7 +4,7 @@ require('dotenv').config({
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
@@ -17,6 +17,8 @@ async function bootstrap() {
     .build();
 
   const app = await NestFactory.create(AppModule);
+
+  app.useGlobalPipes(new ValidationPipe())
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
