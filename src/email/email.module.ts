@@ -3,6 +3,6 @@ import { EmailService } from './email.service';
 import { ConfigService } from '@nestjs/config';
 
 @Module({
-  providers: [EmailService, ConfigService]
+  providers: [EmailService, ConfigService],
 })
-export class EmailModule { }
+export class EmailModule {}

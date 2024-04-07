@@ -21,7 +21,7 @@ import { EmailModule } from './email/email.module';
           username: configService.get('DB_USERNAME'),
           password: configService.get('DB_PASSWORD'),
           database: configService.get('DB_NAME'),
-          logging: true,
+          logging: false,
           entities: ['dist/**/*.entity{.ts,.js}'],
           synchronize: true,
         };

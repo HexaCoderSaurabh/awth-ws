@@ -10,7 +10,7 @@ export class EmailService {
   private readonly logger = new Logger('Email Service');
 
   constructor(private configService: ConfigService) {
-    this.transporter = nodemailer.createTransport(transport)
+    this.transporter = nodemailer.createTransport(transport);
   }
 
   async sendVerificationEmail(email: string, token: string, username: string) {
@@ -21,9 +21,9 @@ export class EmailService {
       const address = `${protocol}://${ip}:${port}`
       const result = await this.transporter.sendMail({
         from: this.configService.get<string>('SES_SENDER_EMAIL'),
-        to: email, //Change this to email variable
+        to: email,
         subject: 'Verification email from Own Streaming App',
-        html: `<p>Click the below link to verify your email address:</p><p><a href="${address}/user/verify-email?token=${token}&username=${username}" target="_balnk">Verify Email</a></p>`,
+        html: `<p>Click the below link to verify your email address:</p><p><a href="${address}/user/verify-email?token=${token}&username=${username}" target="_blank">Verify Email</a></p>`,
       });
 
       this.logger.log('Verification email sent successfully:', result.messageId);
