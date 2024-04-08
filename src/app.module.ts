@@ -7,13 +7,16 @@ import { ConfigValidationSchema } from './config.schema';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CustomNamingStrategy } from './helper/customNamingStrategy';
 import { EmailModule } from './email/email.module';
+import { AuthModule } from './auth/auth.module';
 @Module({
   imports: [
     UserModule,
+    EmailModule,
+    AuthModule,
     ConfigModule.forRoot({
       envFilePath: [`.env.stage.${process.env.STAGE}`],
       validationSchema: ConfigValidationSchema,
-      cache: true
+      cache: true,
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -26,21 +29,27 @@ import { EmailModule } from './email/email.module';
           username: configService.get('DB_USERNAME'),
           password: configService.get('DB_PASSWORD'),
           database: configService.get('DB_NAME'),
-          logging: false,
+          logging: configService.get('STAGE') === 'rd',
           entities: ['dist/**/*.entity{.ts,.js}'],
+          migrations: ['src/database/migrations/*.ts'],
           synchronize: true,
           namingStrategy: new CustomNamingStrategy(),
           extra: {
             dialectOptions: {
               decimalNumbers: true,
             },
-          }
+          },
         };
-      }
+      },
     }),
-    EmailModule,
   ],
   controllers: [AppController],
-  providers: [AppService]
+  providers: [
+    AppService,
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: JwtGuard,
+    // },
+  ],
 })
 export class AppModule { }

@@ -12,7 +12,8 @@
     "baseUrl": "./",
     "paths": {
       "@dtos/*": ["src/dtos/*"],
-      "@entities/*": ["src/entities/*"]
+      "@entities/*": ["src/entities/*"],
+      "@pipes/*": ["src/pipes/*"]
     },
     "incremental": true,
     "skipLibCheck": true,

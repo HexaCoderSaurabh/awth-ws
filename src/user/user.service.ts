@@ -23,9 +23,12 @@ export class UserService {
     return this.usersRepository.find();
   }
 
-  @Get('/:userId')
-  findOne(@Param('userId') id: string): Promise<User | null> {
-    return this.usersRepository.findOneBy({ id });
+  async findOneByIdOrUsername(emailOrUsername: string): Promise<User | null> {
+    const query = this.usersRepository.createQueryBuilder('user')
+    .where('user.username = :username or user.email = :email', { username: emailOrUsername, email: emailOrUsername });
+
+    const user = await query.getOne();
+    return user
   }
 
   async createUser(createUserDto: CreateUserDto): Promise<CreatedUserDto | null> {
@@ -35,10 +38,10 @@ export class UserService {
 
       await user.addPassword(pepper);
       await user.generateEVToken();
-      await this.emailService.sendVerificationEmail(user.email, user.emailVerificationToken, user.username)
 
       const response = await this.usersRepository.save(user);
       this.logger.verbose('Successfully created user')
+      await this.emailService.sendVerificationEmail(user.email, user.emailVerificationToken, user.username)
       const { id, username, email, password, firstName, lastName } = response
       const responseData: CreatedUserDto = {
         id,
@@ -56,11 +59,10 @@ export class UserService {
 
   }
 
-  async verifyToken(tokenQueryDTO: TokenQueryDto): Promise<boolean> {
+  async verifyToken(tokenQueryDTO: TokenQueryDto, user: User): Promise<boolean> {
     let result: boolean = false
     try {
-      const { token, username } = tokenQueryDTO
-      const user: User = await this.usersRepository.findOneBy({ username });
+      const { token } = tokenQueryDTO
       result = await user.verifyEVToken(token)
       if (result) {
         await this.usersRepository.save(user)
@@ -71,6 +73,18 @@ export class UserService {
     } finally {
       return result
     }
+  }
+
+  async verifyPassword(username:string, password: string): Promise<boolean> {
+    try {
+      const user: User = await this.findOneByIdOrUsername(username)
+      const valid = user.validatePassword(password, this.configService.get<string>('PEPPER'))
+      return valid
+    } catch (error) {
+      this.logger.error('Error while verifying password:', error);
+      return false
+    }
+    
   }
 
 }
