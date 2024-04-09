@@ -3,7 +3,6 @@ import { UserService } from './user.service';
 import { Users } from 'src/entities/user.entity';
 import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 import { CreateUserDTO } from 'src/dtos/createuser.dto';
-import { TokenQueryDTO } from 'src/dtos/tokenQuery.dto';
 
 @ApiTags('users')
 @Controller('user')
@@ -25,13 +24,6 @@ export class UserController {
   @Get('/:userId')
   async findOne(@Param('userId') id: string): Promise<Users | null> {
     return await this.userService.findUser(id);
-  }
-
-  @Get('/verify-email')
-  @ApiOperation({ summary: 'Verify email token', operationId: 'verifyEmail' })
-  async verifyEmail(@Query() tokenQuery: TokenQueryDTO): Promise<string> {
-    const isValidEmail = await this.userService.verifyToken(tokenQuery)
-    return isValidEmail ? 'Successfully verified email' : 'Invalid URL'
   }
 
 }

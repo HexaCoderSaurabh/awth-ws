@@ -11,7 +11,6 @@ async function bootstrap() {
     .setTitle('Own Streaming App')
     .setDescription('APIs for streaming app')
     .setVersion('1.0')
-    .addTag('API')
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api', app, document);

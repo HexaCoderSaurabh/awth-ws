@@ -5,6 +5,7 @@ import { UserModule } from './user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { EmailModule } from './email/email.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [UserModule, ConfigModule.forRoot({
@@ -27,7 +28,8 @@ import { EmailModule } from './email/email.module';
         };
       }
     }),
-    EmailModule],
+    EmailModule,
+    AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })
