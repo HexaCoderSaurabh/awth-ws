@@ -24,11 +24,12 @@ export class EmailService {
       const address = `${protocol}://${ip}:${port}`
 
       const verificationURL = `${address}/user/verify-email?token=${token}&username=${username}`
-      const logoUrl = `cid:companyLogoForEmail`
+      const logoUrl = `cid:logo`
+      const zoroUrl = `cid:zoro`
       const fileName = 'emailVerificationTemplate.hbs'
       const templateSource = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', fileName), 'utf-8');
       const template = handlebars.compile(templateSource);
-      const html = template({ verificationURL, logoUrl });
+      const html = template({ verificationURL, logoUrl, zoroUrl });
 
       const result = await this.transporter.sendMail({
         from: this.configService.get<string>('SES_SENDER_EMAIL'),
@@ -36,10 +37,16 @@ export class EmailService {
         subject: 'Verification email from AnimeFlix',
         html,
         attachments: [{
-          filename: 'companyLogoForEmail.png',
-          path: path.resolve(__dirname, '..', '..', 'public', 'companyLogoForEmail.png'),
-          cid: 'companyLogoForEmail'
-        }]
+          filename: 'logo.png',
+          path: path.resolve(__dirname, '..', '..', 'public', 'logo.png'),
+          cid: 'logo'
+        },
+        {
+          filename: 'zoro.png',
+          path: path.resolve(__dirname, '..', '..', 'public', 'zoro.png'),
+          cid: 'zoro'
+        }
+        ]
       });
 
       this.logger.log('Verification email sent successfully:', result.messageId);
