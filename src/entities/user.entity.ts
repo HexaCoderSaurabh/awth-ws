@@ -1,5 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn, Unique } from "typeorm";
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 @Entity()
 export class Users {
@@ -14,7 +14,7 @@ export class Users {
     @Column({ length: 100, unique: true })
     email: string;
 
-    @Column({ select: false })
+    @Column({name:"password", nullable:true})
     password: string;
 
     @Column({ name: "first_name", nullable: true })
@@ -47,13 +47,10 @@ export class Users {
     @Column({ name: 'token_salt', default: '22' })
     tokenSalt: string
 
-    async addPassword(password: string, pepper: string): Promise<void> {
-        const saltRounds = 10;
-        const salt = await bcrypt.genSalt(saltRounds);
-        const hashedPassword = await bcrypt.hash(password + pepper, salt);
-        this.password = hashedPassword;
-        this.salt = salt;
-    }
+    async addPassword(pepper: string): Promise<void> {
+        this.salt = await bcrypt.genSalt(10);
+        this.password = await bcrypt.hash(this.password + pepper, this.salt);
+      }    
 
     async validatePassword(password: string, pepper: string): Promise<boolean> {
         const hash: string = await bcrypt.hash(password + pepper, this.salt);

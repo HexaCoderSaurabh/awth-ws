@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 50px;
+            border-radius: 8px;
+            background: linear-gradient(#1D7C5F, #3dc099);
+            padding-top: 20px;
+        }
+
+        .content {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12);
+            border: 2px solid #1D7C5F;
+        }
+
+        h2 {
+            color: #1D7C5F;
+        }
+
+        p {
+            color: #1D7C5F;
+            text-align: left;
+        }
+
+        .verifyEmail {
+            text-align: center;
+            padding-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .subText {
+            padding-bottom: 20px;
+        }
+
+        a {
+            background-color: #1D7C5F;
+            text-decoration: none;
+            color: #fff !important;
+            padding: 10px 20px;
+            border-radius: 4px;
+            display: table;
+            margin: 0 auto;
+        }
+
+        img {
+            max-width: 200px;
+            text-align: center;
+            display: table;
+            margin: 0 auto;
+            margin-bottom: 20px;
+        }
+
+        .unsubscribe {
+            color: #1D7C5F;
+            margin-top: 30px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div>
+            <img alt="AnimeFlix Logo" src="cid:logo" />
+        </div>
+        <div class="content">
+            <h2>Please verify your email</h2>
+            <p>Hey there!</p>
+            <p class="subText">Thank you for signing up! Just one quick step click the button below to verify your email
+                address.</p>
+            <a href="{{verificationURL}}">Verify Email Address</a>
+            <p class="unsubscribe">Didn't sign up? No worries, just delete this email.</p>
+        </div>
+    </div>
+</body>
+
+</html>

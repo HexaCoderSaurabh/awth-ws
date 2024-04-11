@@ -1,25 +1,31 @@
-import { Controller, Post, Body, ValidationPipe, HttpStatus } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { LoginDto } from '../dtos/login.dto';
-import { CreateUserDTO } from '../dtos/createUser.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { LocalAuthGuard } from './guards/local.guard';
+import { LoginDTO } from '../dtos/login.dto';
 
 @Controller('auth')
-@ApiTags('auth')
+@ApiTags('Auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private authService: AuthService) {}
 
+  @UseGuards(LocalAuthGuard)
+  @ApiOperation({
+    summary: 'To login and generate access token',
+    operationId: 'auth',
+  })
+  @HttpCode(HttpStatus.OK)
   @Post('login')
-  @ApiOperation({ summary: "Login", operationId: "login" })
-  @ApiResponse({ status: HttpStatus.OK, description: 'User loggedIn successfully.' })
-  async login(@Body(ValidationPipe) loginDto: LoginDto) {
-    return await this.authService.login(loginDto);
-  }
-
-  @Post('register')
-  @ApiOperation({ summary: "Sign up", operationId: "Sign up" })
-  @ApiResponse({ status: HttpStatus.OK, description: 'User registered successfully.' })
-  async register(@Body(ValidationPipe) registerDto: CreateUserDTO) {
-    return await this.authService.register(registerDto);
+  async login(@Req() req: any, @Body() loginDto: LoginDTO) {
+    const token = await this.authService.login(req.user);
+    return token;
   }
 }

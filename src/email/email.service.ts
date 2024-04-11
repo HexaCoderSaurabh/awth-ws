@@ -3,6 +3,9 @@ import transport from './ses.transport';
 import { ConfigService } from '@nestjs/config';
 const nodemailer = require('nodemailer');
 import { Transporter } from 'nodemailer';
+import * as handlebars from 'handlebars';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class EmailService {
@@ -19,13 +22,28 @@ export class EmailService {
       const port = this.configService.get<string>('PORT')
       const protocol = this.configService.get<string>('PROTOCOL')
       const address = `${protocol}://${ip}:${port}`
+
+      const verificationURL = `${address}/user/verify-email?token=${token}&username=${username}`
+      const fileName = 'emailVerificationTemplate.hbs'
+      const templateSource = fs.readFileSync(path.resolve(__dirname, '..', '..', 'templates', fileName), 'utf-8');
+      
+      const logoPath = path.resolve(__dirname, '..', '..', 'assets', 'logo.png');
+
+      const template = handlebars.compile(templateSource);
+      const html = template({ verificationURL, logoPath });
+      console.log(html, logoPath, verificationURL);
+      
       const result = await this.transporter.sendMail({
         from: this.configService.get<string>('SES_SENDER_EMAIL'),
         to: email,
-        subject: 'Verification email from Own Streaming App',
-        html: `<p>Click the below link to verify your email address:</p><p><a href="${address}/user/verify-email?token=${token}&username=${username}" target="_blank">Verify Email</a></p>`,
+        subject: 'Verification email from AnimeFlix',
+        html,
+        attachments: [{
+          filename: 'logo.png',
+          path: logoPath,
+          cid: 'logo'
+      }]
       });
-
       this.logger.log('Verification email sent successfully:', result.messageId);
     } catch (error) {
       this.logger.error('Error sending verification email:', error);

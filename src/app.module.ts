@@ -8,7 +8,7 @@ import { EmailModule } from './email/email.module';
 import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [UserModule, ConfigModule.forRoot({
+  imports: [ConfigModule.forRoot({
     envFilePath: `.env.stage.${process.env.STAGE}`,
   }),
     TypeOrmModule.forRootAsync({
@@ -28,9 +28,10 @@ import { AuthModule } from './auth/auth.module';
         };
       }
     }),
+    UserModule,
     EmailModule,
     AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

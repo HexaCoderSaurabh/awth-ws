@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDTO } from 'src/dtos/createuser.dto';
+import { TokenQueryDto } from 'src/dtos/tokenQuery.dto';
 import { EmailService } from 'src/email/email.service';
 import { Users } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -29,25 +30,25 @@ export class UserService {
     return this.userRepository.findOneBy({ username });
   }
 
-  async createUser(user: CreateUserDTO): Promise<CreateUserDTO> {
+  async createUser(user: CreateUserDTO): Promise<CreateUserDTO | null> {
     try {
-      const { username, email, password, firstName, lastName } = user;
-      const newUser = this.userRepository.create(user);
+      const newUser = this.userRepository.create({...user});
       const pepper = await this.configService.get<string>('PEPPER');
 
-      await newUser.addPassword(password,pepper);
+      await newUser.addPassword(pepper);
       await newUser.generateEVToken();
 
       const savedUser = await this.userRepository.save(newUser);
       this.logger.verbose('Successfully created user');
-      this.emailService.sendVerificationEmail(savedUser.email, savedUser.emailVerificationToken, savedUser.username)
+       await this.emailService.sendVerificationEmail(savedUser.email, savedUser.emailVerificationToken, savedUser.username)
 
+      const { id, username, email, password, firstName, lastName } = savedUser
       const responseData: CreateUserDTO = {
-        username: savedUser.username,
-        email: savedUser.email,
-        password: savedUser.password,
-        firstName: savedUser.firstName,
-        lastName: savedUser.lastName
+        username,
+        email,
+        password,
+        firstName,
+        lastName
       };
       return responseData
     }
@@ -57,16 +58,38 @@ export class UserService {
     }
   }
 
-  async verifyPassword(username: string, password: string): Promise<boolean> {
-    try {
-      const user: Users = await this.findUserByName(username)
-      const valid = user.validatePassword(password, this.configService.get<string>('PEPPER'))
-      return valid;
-    } catch (error) {
-      this.logger.error('Error while verifying password:', error);
-      return false
+    async verifyToken(tokenQueryDTO: TokenQueryDto, user: Users): Promise<boolean> {
+      console.log(user, tokenQueryDTO);
+      
+      let result: boolean = false
+      try {
+        const { token } = tokenQueryDTO
+        result = await user.verifyEVToken(token)
+        if (result) {
+          await this.userRepository.save(user)
+          return true;
+        }
+        else return false;
+      } catch (error) {
+        this.logger.error('Error while verifying token:', error);
+        throw new BadRequestException({ message: 'Token Verification Failed', errors: error.message });
+      } finally {
+        return result
+      }
     }
-  }
+  
+    async verifyPassword(username:string, password: string): Promise<boolean> {
+      try {
+        const user: Users = await this.findUserByName(username)
+        const valid = user.validatePassword(password, this.configService.get<string>('PEPPER'))
+        return valid
+      } catch (error) {
+        this.logger.error('Error while verifying password:', error);
+        return false
+      }
+      
+    }
+  
 
 }
 
